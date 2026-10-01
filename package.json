@@ -1,0 +1,15 @@
+{
+  "name": "musix",
+  "version": "1.0.0",
+  "description": "A fun, friendly and accessible web synthesizer. Zero dependencies, no build step.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 5173 .",
+    "test": "node --test",
+    "check": "node --test && for f in $(find src -name '*.js'); do node --check \"$f\" || exit 1; done"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

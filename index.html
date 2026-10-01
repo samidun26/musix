@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Musix Synth</title>
+  <meta name="description" content="A friendly, accessible synthesizer that runs in your browser. Play with your mouse, touch screen, computer keyboard or MIDI keyboard.">
+  <meta name="theme-color" content="#E9EEF6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#12111F" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="assets/manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=Fredoka:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="src/styles/tokens.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script>
+    // Apply saved look before first paint so there's no flash of the wrong theme.
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('musix:v1:settings') || '{}');
+        var r = document.documentElement;
+        if (s.theme === 'light' || s.theme === 'dark') r.dataset.theme = s.theme;
+        if (s.textSize && s.textSize !== 'default') r.dataset.text = s.textSize;
+        if (s.readableFont) r.dataset.font = 'readable';
+        var hc = s.contrast === 'more' || (s.contrast !== 'standard' && matchMedia('(prefers-contrast: more)').matches);
+        if (hc) r.dataset.contrast = 'more';
+        var rm = s.motion === 'reduce' || (s.motion !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+        if (rm) r.dataset.motion = 'reduce';
+      } catch (e) { /* storage blocked: defaults are fine */ }
+    })();
+  </script>
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+    <symbol id="i-access" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5M12 14.5l-3 6M12 14.5l3 6"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" class="fill"/><circle cx="12" cy="12" r="1.3" class="fill"/><circle cx="15.5" cy="15.5" r="1.3" class="fill"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.2-9A5 5 0 0 1 12 6a5 5 0 0 1 9.2 5c-2.2 4.6-9.2 9-9.2 9z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" class="fill"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" class="fill"/></symbol>
+    <symbol id="i-record" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" class="fill"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="7.5" cy="12" r="1" class="fill"/><circle cx="16.5" cy="12" r="1" class="fill"/><circle cx="12" cy="7.5" r="1" class="fill"/><circle cx="8.8" cy="8.8" r="1" class="fill"/><circle cx="15.2" cy="8.8" r="1" class="fill"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#keys">Skip to the keyboard</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+        <rect x="2" y="6" width="36" height="28" rx="9" class="brand__body"/>
+        <rect x="8" y="12" width="5" height="16" rx="2" class="brand__k1"/>
+        <rect x="17.5" y="12" width="5" height="16" rx="2" class="brand__k2"/>
+        <rect x="27" y="12" width="5" height="16" rx="2" class="brand__k3"/>
+      </svg>
+      <p class="brand__name">musix<span class="brand__tag">a friendly synth</span></p>
+    </div>
+
+    <button id="power" class="power" type="button" aria-describedby="power-help">
+      <span class="power__dot" aria-hidden="true"></span>
+      <span class="power__label">Tap to wake the sound</span>
+    </button>
+    <span id="power-help" class="visually-hidden">Browsers keep sound off until you interact. Any key or click also wakes it.</span>
+
+    <nav class="topbar__actions" aria-label="App">
+      <button id="open-share" class="btn btn--quiet" type="button" aria-haspopup="dialog">
+        <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg><span class="btn__text">Share</span>
+      </button>
+      <button id="open-settings" class="btn btn--quiet" type="button" aria-haspopup="dialog">
+        <svg class="icon" aria-hidden="true"><use href="#i-access"/></svg><span class="btn__text">Comfort</span>
+      </button>
+      <button id="open-help" class="btn btn--quiet" type="button" aria-haspopup="dialog" aria-keyshortcuts="Shift+Slash">
+        <svg class="icon" aria-hidden="true"><use href="#i-keyboard"/></svg><span class="btn__text">Shortcuts</span>
+      </button>
+      <button id="theme-toggle" class="btn btn--quiet btn--icon" type="button" aria-label="Use dark theme">
+        <svg class="icon icon--moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        <svg class="icon icon--sun" aria-hidden="true"><use href="#i-sun"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <h1 class="visually-hidden">Musix, a friendly synthesizer</h1>
+
+    <section class="console" aria-label="Synthesizer">
+      <section class="screen" aria-labelledby="screen-heading">
+        <h2 id="screen-heading" class="visually-hidden">Display</h2>
+        <dl class="lcd">
+          <div class="lcd__cell lcd__cell--wide"><dt>Sound</dt><dd id="lcd-sound">Hello Synth</dd></div>
+          <div class="lcd__cell lcd__cell--wide"><dt>Playing</dt><dd id="lcd-note">Nothing yet</dd></div>
+          <div class="lcd__cell"><dt>Scale</dt><dd id="lcd-scale">Every note</dd></div>
+          <div class="lcd__cell"><dt>Tempo</dt><dd id="lcd-tempo">108 BPM</dd></div>
+        </dl>
+        <div class="stage" id="stage">
+          <canvas id="viz" class="stage__viz" aria-hidden="true"></canvas>
+          <div class="mascot" id="mascot" aria-hidden="true">
+            <svg viewBox="0 0 120 120" class="mascot__svg" focusable="false">
+              <g class="mascot__body-group">
+                <line x1="60" y1="22" x2="66" y2="8" class="mascot__stroke"/>
+                <circle cx="68" cy="7" r="5.5" class="mascot__antenna"/>
+                <path class="mascot__body" d="M60 20c26 0 44 14 44 42 0 30-18 44-44 44S16 92 16 62c0-28 18-42 44-42z"/>
+                <g class="mascot__eyes">
+                  <ellipse cx="45" cy="58" rx="7" ry="9" class="mascot__eye"/>
+                  <ellipse cx="75" cy="58" rx="7" ry="9" class="mascot__eye"/>
+                  <circle cx="47" cy="56" r="2.4" class="mascot__shine"/>
+                  <circle cx="77" cy="56" r="2.4" class="mascot__shine"/>
+                </g>
+                <circle cx="34" cy="74" r="6" class="mascot__cheek"/>
+                <circle cx="86" cy="74" r="6" class="mascot__cheek"/>
+                <ellipse id="mascot-mouth" cx="60" cy="80" rx="9" ry="3" class="mascot__mouth"/>
+              </g>
+            </svg>
+          </div>
+          <p class="speech" id="mascot-tip">Hi, I’m Musi! Press any key and I’ll sing along.</p>
+          <button id="viz-mode" class="chip chip--screen" type="button" aria-pressed="false">Spectrum view</button>
+        </div>
+      </section>
+
+      <section class="play" aria-labelledby="play-heading">
+        <h2 id="play-heading" class="visually-hidden">Keyboard and play modes</h2>
+        <div class="playbar">
+          <div class="stepper" role="group" aria-labelledby="octave-label">
+            <span class="field__label" id="octave-label">Octave</span>
+            <div class="stepper__row">
+              <button id="octave-down" class="btn btn--icon btn--small" type="button" aria-label="Octave down" aria-keyshortcuts="Z"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button>
+              <output id="octave-value" class="stepper__value" aria-live="polite">0</output>
+              <button id="octave-up" class="btn btn--icon btn--small" type="button" aria-label="Octave up" aria-keyshortcuts="X"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="scale">Scale lock</label>
+            <select id="scale" class="select" aria-describedby="scale-help"></select>
+            <span id="scale-help" class="visually-hidden">Keys outside the scale play the nearest scale note, so nothing sounds wrong.</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="root">Key</label>
+            <select id="root" class="select"></select>
+          </div>
+          <div class="field">
+            <label class="field__label" for="chord">Chord buddy</label>
+            <select id="chord" class="select" aria-describedby="chord-help"></select>
+            <span id="chord-help" class="visually-hidden">One key plays a whole chord. With a scale lock, chords match the scale.</span>
+          </div>
+          <div class="field field--pair">
+            <label class="field__label" for="arp">Arpeggio</label>
+            <div class="field__row">
+              <select id="arp" class="select"></select>
+              <select id="arp-rate" class="select select--narrow" aria-label="Arpeggio speed"></select>
+            </div>
+          </div>
+          <div class="playbar__toggles">
+            <button id="hold" class="btn btn--toggle" type="button" aria-pressed="false" aria-describedby="hold-help" aria-keyshortcuts="Shift+H">
+              <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Hold
+            </button>
+            <span id="hold-help" class="visually-hidden">Notes keep playing after you let go. Press a key again to stop it.</span>
+            <button id="panic" class="btn btn--stop" type="button" aria-keyshortcuts="Escape">
+              <svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Stop all
+            </button>
+          </div>
+        </div>
+
+        <div class="keybed">
+          <div class="keys" id="keys" role="group" aria-label="Piano keys" aria-describedby="keys-help" tabindex="-1"></div>
+        </div>
+        <p id="keys-help" class="keys-help">
+          Click or tap the keys, drag across them to glide, or play from your computer keyboard:
+          <kbd>A</kbd>–<kbd>;</kbd> for white keys and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> for sharps.
+          Keyboard users can Tab to the keys, move with arrow keys and play with <kbd>Space</kbd>.
+        </p>
+      </section>
+
+      <section class="lab" aria-labelledby="lab-heading">
+        <div class="lab__head">
+          <h2 id="lab-heading" class="section-title">Sound lab</h2>
+          <div class="lab__actions">
+            <button id="surprise" class="btn btn--accent" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-dice"/></svg>Surprise me
+            </button>
+            <button id="save-sound" class="btn" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>Save
+            </button>
+          </div>
+        </div>
+
+        <div class="presets" id="presets" role="group" aria-label="Sounds"></div>
+
+        <fieldset class="waves">
+          <legend class="waves__legend">Wave shape</legend>
+          <div class="waves__row">
+            <label class="wave"><input type="radio" name="wave" value="sine"><svg viewBox="0 0 48 24" aria-hidden="true"><path d="M2 12c5.5-12 10.5-12 16 0s10.5 12 16 0 10.5-12 12-6"/></svg><span>Smooth</span></label>
+            <label class="wave"><input type="radio" name="wave" value="triangle"><svg viewBox="0 0 48 24" aria-hidden="true"><path d="M2 12l8-9 16 18 16-18 4 4.5"/></svg><span>Mellow</span></label>
+            <label class="wave"><input type="radio" name="wave" value="square"><svg viewBox="0 0 48 24" aria-hidden="true"><path d="M2 20V4h11v16h11V4h11v16h11"/></svg><span>Retro</span></label>
+            <label class="wave"><input type="radio" name="wave" value="sawtooth"><svg viewBox="0 0 48 24" aria-hidden="true"><path d="M2 20L17 4v16L32 4v16L46 4"/></svg><span>Bold</span></label>
+          </div>
+        </fieldset>
+
+        <div class="knobs" id="knobs"></div>
+      </section>
+    </section>
+
+    <div class="dock">
+      <section class="module garden" aria-labelledby="garden-heading">
+        <div class="module__head">
+          <h2 id="garden-heading" class="section-title">Beat garden</h2>
+          <div class="garden__controls">
+            <button id="beat-play" class="btn btn--accent btn--toggle" type="button" aria-pressed="false" aria-keyshortcuts="Shift+B">
+              <svg class="icon icon--play" aria-hidden="true"><use href="#i-play"/></svg>
+              <svg class="icon icon--stop" aria-hidden="true"><use href="#i-stop"/></svg>
+              <span class="beat-play__label">Play beat</span>
+            </button>
+            <div class="field field--inline">
+              <label class="field__label" for="tempo">Tempo</label>
+              <input id="tempo" class="range" type="range" min="60" max="180" step="1" value="108">
+              <output id="tempo-value" for="tempo" class="mono">108</output>
+            </div>
+            <div class="field field--inline">
+              <label class="field__label" for="beat-level">Beat volume</label>
+              <input id="beat-level" class="range range--short" type="range" min="0" max="100" step="1" value="80">
+            </div>
+            <div class="field field--inline">
+              <label class="field__label" for="beat-preset">Pattern</label>
+              <select id="beat-preset" class="select"></select>
+            </div>
+            <button id="beat-random" class="btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-dice"/></svg>Random</button>
+          </div>
+        </div>
+        <div class="grid-scroll">
+          <div class="beatgrid" id="beatgrid" role="grid" aria-labelledby="garden-heading" aria-describedby="grid-help"></div>
+        </div>
+        <p id="grid-help" class="module__help">Each row is a drum, each square is a 16th note. Use arrow keys to move and <kbd>Space</kbd> to plant or pull a beat.</p>
+      </section>
+
+      <section class="module pad" aria-labelledby="pad-heading">
+        <div class="module__head">
+          <h2 id="pad-heading" class="section-title">Magic pad</h2>
+          <div class="segmented" role="radiogroup" aria-label="Pad mode">
+            <label><input type="radio" name="pad-mode" value="play" checked><span>Play notes</span></label>
+            <label><input type="radio" name="pad-mode" value="shape"><span>Shape sound</span></label>
+          </div>
+        </div>
+        <div class="xy" id="xy" tabindex="0" role="application" aria-roledescription="touch pad" aria-label="Magic pad" aria-describedby="xy-help">
+          <canvas class="xy__canvas" aria-hidden="true"></canvas>
+          <div class="xy__puck" aria-hidden="true"></div>
+          <span class="xy__axis xy__axis--x" aria-hidden="true">Pitch →</span>
+          <span class="xy__axis xy__axis--y" aria-hidden="true">Brightness →</span>
+        </div>
+        <p id="xy-help" class="module__help">Drag across the pad. In Play mode left–right is pitch (always in your scale) and up–down is brightness. With the keyboard: arrow keys move, hold <kbd>Space</kbd> to sound.</p>
+      </section>
+
+      <section class="module fun" aria-labelledby="fun-heading">
+        <h2 id="fun-heading" class="visually-hidden">Games and tools</h2>
+        <div class="tabs" role="tablist" aria-label="Games and tools">
+          <button class="tab" role="tab" id="tab-word" aria-controls="panel-word" aria-selected="true" type="button">Word melody</button>
+          <button class="tab" role="tab" id="tab-copycat" aria-controls="panel-copycat" aria-selected="false" tabindex="-1" type="button">Copycat</button>
+          <button class="tab" role="tab" id="tab-record" aria-controls="panel-record" aria-selected="false" tabindex="-1" type="button">Record</button>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-word" aria-labelledby="tab-word">
+          <form class="word-form" id="word-form">
+            <label class="field__label" for="word-input">Type anything — your name, a word, an emoji</label>
+            <div class="word-form__row">
+              <input id="word-input" class="text-input" type="text" maxlength="60" autocomplete="off" spellcheck="false" value="Musix loves you">
+              <button class="btn btn--accent" type="submit" id="word-play"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Sing it</button>
+            </div>
+          </form>
+          <ol class="word-notes" id="word-notes" aria-label="Melody notes"></ol>
+          <p class="module__help">Letters become notes in your current scale. Vowels sing longer, spaces take a breath, and the tune always lands home.</p>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-copycat" aria-labelledby="tab-copycat" hidden>
+          <div class="copycat">
+            <div class="copycat__status">
+              <p class="copycat__title" id="cc-title">Can you copy Musi?</p>
+              <p class="copycat__msg" id="cc-msg">Musi plays a tiny tune. Play it back on the keyboard. Any octave counts.</p>
+            </div>
+            <div class="copycat__dots" id="cc-dots" aria-hidden="true"></div>
+            <dl class="copycat__stats">
+              <div><dt>Round</dt><dd id="cc-round">–</dd></div>
+              <div><dt>Hearts</dt><dd id="cc-lives" aria-label="3 hearts">♥♥♥</dd></div>
+              <div><dt>Best</dt><dd id="cc-best">0</dd></div>
+            </dl>
+            <div class="copycat__actions">
+              <button id="cc-start" class="btn btn--accent" type="button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Start game</button>
+              <button id="cc-replay" class="btn" type="button" disabled><svg class="icon" aria-hidden="true"><use href="#i-replay"/></svg>Hear it again</button>
+              <label class="check"><input type="checkbox" id="cc-show" checked><span>Light up the keys</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-record" aria-labelledby="tab-record" hidden>
+          <div class="recorder">
+            <div class="recorder__main">
+              <button id="rec-toggle" class="btn btn--rec" type="button" aria-pressed="false">
+                <svg class="icon" aria-hidden="true"><use href="#i-record"/></svg><span id="rec-label">Start recording</span>
+              </button>
+              <p class="recorder__time mono" id="rec-time" aria-hidden="true">0:00</p>
+            </div>
+            <p class="module__help" id="rec-help">Captures everything you hear — keys, beats and effects. Takes stay on this device.</p>
+            <ul class="takes" id="takes" aria-label="Recorded takes"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made for everyone: works with a mouse, touch, keyboard, MIDI and screen readers. Press <kbd>?</kbd> for shortcuts.</p>
+    <p class="footer__midi"><button id="midi-connect" class="link-button" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plug"/></svg>Connect a MIDI keyboard</button> <span id="midi-status" class="footer__status"></span></p>
+  </footer>
+
+  <div id="sr-polite" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+  <div id="sr-assertive" class="visually-hidden" aria-live="assertive" aria-atomic="true"></div>
+  <div class="toasts" id="toasts" aria-hidden="true"></div>
+
+  <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
+    <form method="dialog" class="dialog__inner" id="settings-form">
+      <header class="dialog__head">
+        <h2 id="settings-title" class="section-title">Comfort &amp; accessibility</h2>
+        <button class="btn btn--icon btn--quiet" value="close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="dialog__body settings">
+        <fieldset class="settings__group">
+          <legend>Look</legend>
+          <div class="setting">
+            <span class="setting__label" id="lbl-theme">Theme</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="lbl-theme">
+              <label><input type="radio" name="theme" value="system"><span>System</span></label>
+              <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+              <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting__label" id="lbl-contrast">Contrast</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="lbl-contrast">
+              <label><input type="radio" name="contrast" value="system"><span>System</span></label>
+              <label><input type="radio" name="contrast" value="standard"><span>Standard</span></label>
+              <label><input type="radio" name="contrast" value="more"><span>High</span></label>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting__label" id="lbl-motion">Motion</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="lbl-motion">
+              <label><input type="radio" name="motion" value="system"><span>System</span></label>
+              <label><input type="radio" name="motion" value="reduce"><span>Calm</span></label>
+              <label><input type="radio" name="motion" value="full"><span>Full</span></label>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting__label" id="lbl-text">Text size</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="lbl-text">
+              <label><input type="radio" name="textSize" value="default"><span>Default</span></label>
+              <label><input type="radio" name="textSize" value="large"><span>Large</span></label>
+              <label><input type="radio" name="textSize" value="larger"><span>Larger</span></label>
+            </div>
+          </div>
+          <label class="switch"><input type="checkbox" name="readableFont" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Extra-readable lettering <small>Plain letterforms with wider spacing</small></span></label>
+        </fieldset>
+
+        <fieldset class="settings__group">
+          <legend>Playing</legend>
+          <div class="setting">
+            <span class="setting__label" id="lbl-names">Note names</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="lbl-names">
+              <label><input type="radio" name="noteNames" value="letters"><span>C D E</span></label>
+              <label><input type="radio" name="noteNames" value="solfege"><span>Do Re Mi</span></label>
+            </div>
+          </div>
+          <label class="switch"><input type="checkbox" name="bigKeys" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Big keys <small>Fewer, larger keys that are easier to hit</small></span></label>
+          <label class="switch"><input type="checkbox" name="keyHints" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Show computer-key letters on the piano</span></label>
+          <label class="switch"><input type="checkbox" name="computerKeys" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Computer keyboard plays notes</span></label>
+          <label class="switch"><input type="checkbox" name="haptics" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Buzz on touch <small>A short vibration on phones that support it</small></span></label>
+        </fieldset>
+
+        <fieldset class="settings__group">
+          <legend>Hearing &amp; screen readers</legend>
+          <div class="setting setting--range">
+            <label class="setting__label" for="max-volume">Loudness limit</label>
+            <input id="max-volume" name="maxVolume" class="range" type="range" min="10" max="100" step="5">
+            <output id="max-volume-value" for="max-volume" class="mono">85%</output>
+          </div>
+          <label class="switch"><input type="checkbox" name="mono" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Mono audio <small>Same sound in both ears</small></span></label>
+          <label class="switch"><input type="checkbox" name="beatFlash" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Flash the screen on each beat <small>See the rhythm as well as hear it</small></span></label>
+          <label class="switch"><input type="checkbox" name="announceNotes" role="switch"><span class="switch__track" aria-hidden="true"></span><span>Announce notes and chords <small>Screen readers say what you play</small></span></label>
+        </fieldset>
+      </div>
+      <footer class="dialog__foot">
+        <button class="btn btn--quiet" type="button" id="settings-reset">Reset to defaults</button>
+        <button class="btn btn--accent" value="close">Done</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="help-dialog" aria-labelledby="help-title">
+    <form method="dialog" class="dialog__inner">
+      <header class="dialog__head">
+        <h2 id="help-title" class="section-title">Shortcuts &amp; tips</h2>
+        <button class="btn btn--icon btn--quiet" value="close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="dialog__body help">
+        <div class="help__keys" aria-hidden="true">
+          <div class="minikeys">
+            <span class="mk mk--b" style="--c:1">W</span><span class="mk mk--b" style="--c:2">E</span><span class="mk mk--b" style="--c:4">T</span><span class="mk mk--b" style="--c:5">Y</span><span class="mk mk--b" style="--c:6">U</span><span class="mk mk--b" style="--c:8">O</span><span class="mk mk--b" style="--c:9">P</span>
+            <span class="mk">A</span><span class="mk">S</span><span class="mk">D</span><span class="mk">F</span><span class="mk">G</span><span class="mk">H</span><span class="mk">J</span><span class="mk">K</span><span class="mk">L</span><span class="mk">;</span>
+          </div>
+        </div>
+        <table class="shortcuts">
+          <caption class="visually-hidden">Keyboard shortcuts</caption>
+          <tbody>
+            <tr><th scope="row"><kbd>A</kbd> to <kbd>;</kbd></th><td>Play white keys, starting at C</td></tr>
+            <tr><th scope="row"><kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd></th><td>Play sharps (black keys)</td></tr>
+            <tr><th scope="row"><kbd>Z</kbd> / <kbd>X</kbd></th><td>Octave down / up</td></tr>
+            <tr><th scope="row"><kbd>[</kbd> / <kbd>]</kbd></th><td>Previous / next sound</td></tr>
+            <tr><th scope="row"><kbd>Shift</kbd> + <kbd>H</kbd></th><td>Hold notes on or off</td></tr>
+            <tr><th scope="row"><kbd>Shift</kbd> + <kbd>B</kbd></th><td>Play or stop the beat</td></tr>
+            <tr><th scope="row"><kbd>Esc</kbd></th><td>Stop every sound</td></tr>
+            <tr><th scope="row"><kbd>?</kbd></th><td>Open this list</td></tr>
+          </tbody>
+        </table>
+        <h3 class="help__heading">Getting around</h3>
+        <ul class="help__list">
+          <li>On the piano, the knobs and the beat grid, <kbd>Tab</kbd> moves between areas and arrow keys move inside them.</li>
+          <li>Knobs: arrows nudge, <kbd>Page Up</kbd>/<kbd>Page Down</kbd> make big jumps, <kbd>Home</kbd>/<kbd>End</kbd> go to the ends. Hold <kbd>Shift</kbd> while dragging for fine control.</li>
+          <li>Hard to hold keys down? Turn on <strong>Hold</strong>: tap once to start a note, tap again to stop it.</li>
+          <li>Not sure what to play? Set <strong>Scale lock</strong> to “Major pentatonic” — every key sounds good.</li>
+        </ul>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="share-dialog" aria-labelledby="share-title">
+    <form method="dialog" class="dialog__inner">
+      <header class="dialog__head">
+        <h2 id="share-title" class="section-title">Share this sound</h2>
+        <button class="btn btn--icon btn--quiet" value="close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="dialog__body share">
+        <p class="share__lead">Your sound fits in a short code. Send the link, or the code, to a friend.</p>
+        <label class="field__label" for="share-link">Link</label>
+        <div class="copy-row">
+          <input id="share-link" class="text-input mono" type="text" readonly>
+          <button class="btn" type="button" data-copy="share-link"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy link</button>
+        </div>
+        <label class="field__label" for="share-code">Sound code</label>
+        <div class="copy-row">
+          <input id="share-code" class="text-input mono" type="text" readonly>
+          <button class="btn" type="button" data-copy="share-code"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy code</button>
+        </div>
+        <hr class="divider">
+        <label class="field__label" for="share-paste">Got a code from someone? Paste it here</label>
+        <div class="copy-row">
+          <input id="share-paste" class="text-input mono" type="text" placeholder="mx1.…" autocomplete="off" spellcheck="false" aria-describedby="share-error">
+          <button class="btn btn--accent" type="button" id="share-load">Load sound</button>
+        </div>
+        <p class="field__error" id="share-error" role="alert"></p>
+      </div>
+    </form>
+  </dialog>
+
+  <noscript><p class="noscript">Musix needs JavaScript turned on to make sound.</p></noscript>
+</body>
+</html>

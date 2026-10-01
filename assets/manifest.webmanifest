@@ -1,0 +1,13 @@
+{
+  "name": "Musix — a friendly synth",
+  "short_name": "Musix",
+  "description": "A friendly, accessible synthesizer that runs in your browser.",
+  "start_url": "../index.html",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#e9eef6",
+  "theme_color": "#ffc93c",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

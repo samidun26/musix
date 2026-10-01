@@ -1,0 +1,190 @@
+/* Layout: a chunky toy-synth console — tactile panels with keycap shadows on a
+   perforated desk; the keyboard runs full width as the hero, modules dock below. */
+:root {
+  --font-display: "Fredoka", ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --bg: #e9eef6;
+  --bg-dot: #d2dae8;
+  --surface: #ffffff;
+  --surface-2: #f2f5fb;
+  --ink: #1d1b36;
+  --ink-soft: #55536f;
+  --line: #1d1b36;
+  --line-soft: #c7cfdf;
+  --shadow: #1d1b36;
+  --accent: #ffc93c;
+  --accent-ink: #1d1b36;
+  --pop: #ff5d73;
+  --pop-ink: #1d1b36;
+  --good: #1f9d63;
+  --focus: #2e5bff;
+  --focus-halo: rgba(46, 91, 255, 0.25);
+  --backdrop: rgba(29, 27, 54, 0.45);
+
+  /* The screen is always a dark LCD, in both themes. */
+  --screen: #17152e;
+  --screen-2: #24214a;
+  --screen-ink: #f2eeff;
+  --screen-soft: #aaa4d8;
+  --screen-line: #3a3670;
+
+  --key-white: #ffffff;
+  --key-white-ink: #1d1b36;
+  --key-black: #1d1b36;
+  --key-black-ink: #f2eeff;
+  --keybed: #1d1b36;
+
+  /* Note colours follow the Boomwhacker classroom convention. */
+  --n0: #ff4d4d;
+  --n1: #ff7a3d;
+  --n2: #ff9f1c;
+  --n3: #ffbf3d;
+  --n4: #ffe14d;
+  --n5: #9be15d;
+  --n6: #3ccb7f;
+  --n7: #2ec4b6;
+  --n8: #3da5ff;
+  --n9: #7b86ff;
+  --n10: #b17bff;
+  --n11: #ff6fb5;
+
+  --tone: #ff8a3d;
+  --shape: #20b8a8;
+  --fx: #9b6bff;
+
+  --bw: 2px;
+  --lift: 4px;
+  --radius-s: 10px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: 1.5rem;
+  --step-3: 2rem;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12111f;
+    --bg-dot: #1d1b33;
+    --surface: #201e38;
+    --surface-2: #2a2748;
+    --ink: #f2f0ff;
+    --ink-soft: #b6b2d6;
+    --line: #07060f;
+    --line-soft: #3d3a66;
+    --shadow: #04030a;
+    --accent: #ffc93c;
+    --accent-ink: #1d1b36;
+    --pop: #ff6f82;
+    --pop-ink: #1d1b36;
+    --good: #4fd394;
+    --focus: #9db7ff;
+    --focus-halo: rgba(157, 183, 255, 0.3);
+    --backdrop: rgba(4, 3, 10, 0.65);
+    --screen: #0c0b19;
+    --screen-2: #1a1834;
+    --screen-line: #34306a;
+    --key-white: #eeecf8;
+    --key-black: #0c0b19;
+    --keybed: #07060f;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12111f;
+  --bg-dot: #1d1b33;
+  --surface: #201e38;
+  --surface-2: #2a2748;
+  --ink: #f2f0ff;
+  --ink-soft: #b6b2d6;
+  --line: #07060f;
+  --line-soft: #3d3a66;
+  --shadow: #04030a;
+  --accent: #ffc93c;
+  --accent-ink: #1d1b36;
+  --pop: #ff6f82;
+  --pop-ink: #1d1b36;
+  --good: #4fd394;
+  --focus: #9db7ff;
+  --focus-halo: rgba(157, 183, 255, 0.3);
+  --backdrop: rgba(4, 3, 10, 0.65);
+  --screen: #0c0b19;
+  --screen-2: #1a1834;
+  --screen-line: #34306a;
+  --key-white: #eeecf8;
+  --key-black: #0c0b19;
+  --keybed: #07060f;
+  color-scheme: dark;
+}
+
+/* High contrast: pure black and white, thicker outlines, no soft greys. */
+:root[data-contrast="more"] {
+  --bg: #ffffff;
+  --bg-dot: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --ink: #000000;
+  --ink-soft: #000000;
+  --line: #000000;
+  --line-soft: #000000;
+  --shadow: #000000;
+  --focus: #0033cc;
+  --screen: #000000;
+  --screen-2: #000000;
+  --screen-ink: #ffffff;
+  --screen-soft: #ffffff;
+  --screen-line: #ffffff;
+  --key-white: #ffffff;
+  --key-black: #000000;
+  --keybed: #000000;
+  --bw: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast="more"]:not([data-theme="light"]) {
+    --bg: #000000;
+    --bg-dot: #000000;
+    --surface: #000000;
+    --surface-2: #000000;
+    --ink: #ffffff;
+    --ink-soft: #ffffff;
+    --line: #ffffff;
+    --line-soft: #ffffff;
+    --shadow: #ffffff;
+    --focus: #ffff00;
+    --key-white: #ffffff;
+    --key-black: #000000;
+    --keybed: #ffffff;
+  }
+}
+
+:root[data-theme="dark"][data-contrast="more"] {
+  --bg: #000000;
+  --bg-dot: #000000;
+  --surface: #000000;
+  --surface-2: #000000;
+  --ink: #ffffff;
+  --ink-soft: #ffffff;
+  --line: #ffffff;
+  --line-soft: #ffffff;
+  --shadow: #ffffff;
+  --focus: #ffff00;
+  --key-white: #ffffff;
+  --key-black: #000000;
+  --keybed: #ffffff;
+}
+
+:root[data-text="large"] { font-size: 112.5%; }
+:root[data-text="larger"] { font-size: 125%; }
+
+:root[data-font="readable"] {
+  --font-display: var(--font-body);
+}
